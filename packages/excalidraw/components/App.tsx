@@ -59,6 +59,7 @@ import {
   POINTER_EVENTS,
   TOOL_TYPE,
   isIOS,
+  supportsResizeObserver,
   DEFAULT_COLLISION_THRESHOLD,
   DEFAULT_TEXT_ALIGN,
   ARROW_TYPE,
@@ -522,9 +523,6 @@ export const useExcalidrawSetAppState = () =>
   useContext(ExcalidrawSetAppStateContext);
 export const useExcalidrawActionManager = () =>
   useContext(ExcalidrawActionManagerContext);
-
-const supportsResizeObserver =
-  typeof window !== "undefined" && "ResizeObserver" in window;
 
 let didTapTwice: boolean = false;
 let tappedTwiceTimer = 0;

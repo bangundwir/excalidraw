@@ -25,6 +25,9 @@ export const isIOS =
 export const isBrave = () =>
   (navigator as any).brave?.isBrave?.name === "isBrave";
 
+export const supportsResizeObserver =
+  typeof window !== "undefined" && "ResizeObserver" in window;
+
 export const APP_NAME = "Excalidraw";
 
 // distance when creating text before it's considered `autoResize: false`
@@ -38,6 +41,7 @@ export const ELEMENT_SHIFT_TRANSLATE_AMOUNT = 5;
 export const ELEMENT_TRANSLATE_AMOUNT = 1;
 export const TEXT_TO_CENTER_SNAP_THRESHOLD = 30;
 export const SHIFT_LOCKING_ANGLE = Math.PI / 12;
+export const DEFAULT_LASER_COLOR = "red";
 export const CURSOR_TYPE = {
   TEXT: "text",
   CROSSHAIR: "crosshair",
