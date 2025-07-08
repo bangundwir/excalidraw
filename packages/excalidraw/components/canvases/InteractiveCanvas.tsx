@@ -66,46 +66,42 @@ const InteractiveCanvas = (props: InteractiveCanvasProps) => {
       return;
     }
 
-    const remotePointerButton: InteractiveCanvasRenderConfig["remotePointerButton"] =
-      new Map();
-    const remotePointerViewportCoords: InteractiveCanvasRenderConfig["remotePointerViewportCoords"] =
-      new Map();
+    const cursorButton: {
+      [id: string]: string | undefined;
+    } = {};
+    const pointerViewportCoords: InteractiveCanvasRenderConfig["remotePointerViewportCoords"] =
+      {};
     const remoteSelectedElementIds: InteractiveCanvasRenderConfig["remoteSelectedElementIds"] =
-      new Map();
-    const remotePointerUsernames: InteractiveCanvasRenderConfig["remotePointerUsernames"] =
-      new Map();
-    const remotePointerUserStates: InteractiveCanvasRenderConfig["remotePointerUserStates"] =
-      new Map();
+      {};
+    const pointerUsernames: { [id: string]: string } = {};
+    const pointerUserStates: { [id: string]: string } = {};
 
     props.appState.collaborators.forEach((user, socketId) => {
       if (user.selectedElementIds) {
         for (const id of Object.keys(user.selectedElementIds)) {
-          if (!remoteSelectedElementIds.has(id)) {
-            remoteSelectedElementIds.set(id, []);
+          if (!(id in remoteSelectedElementIds)) {
+            remoteSelectedElementIds[id] = [];
           }
-          remoteSelectedElementIds.get(id)!.push(socketId);
+          remoteSelectedElementIds[id].push(socketId);
         }
       }
-      if (!user.pointer || user.pointer.renderCursor === false) {
+      if (!user.pointer) {
         return;
       }
       if (user.username) {
-        remotePointerUsernames.set(socketId, user.username);
+        pointerUsernames[socketId] = user.username;
       }
       if (user.userState) {
-        remotePointerUserStates.set(socketId, user.userState);
+        pointerUserStates[socketId] = user.userState;
       }
-      remotePointerViewportCoords.set(
-        socketId,
-        sceneCoordsToViewportCoords(
-          {
-            sceneX: user.pointer.x,
-            sceneY: user.pointer.y,
-          },
-          props.appState,
-        ),
+      pointerViewportCoords[socketId] = sceneCoordsToViewportCoords(
+        {
+          sceneX: user.pointer.x,
+          sceneY: user.pointer.y,
+        },
+        props.appState,
       );
-      remotePointerButton.set(socketId, user.button);
+      cursorButton[socketId] = user.button;
     });
 
     const selectionColor =
@@ -124,11 +120,11 @@ const InteractiveCanvas = (props: InteractiveCanvasProps) => {
         scale: window.devicePixelRatio,
         appState: props.appState,
         renderConfig: {
-          remotePointerViewportCoords,
-          remotePointerButton,
+          remotePointerViewportCoords: pointerViewportCoords,
+          remotePointerButton: cursorButton,
           remoteSelectedElementIds,
-          remotePointerUsernames,
-          remotePointerUserStates,
+          remotePointerUsernames: pointerUsernames,
+          remotePointerUserStates: pointerUserStates,
           selectionColor,
           renderScrollbars: false,
         },

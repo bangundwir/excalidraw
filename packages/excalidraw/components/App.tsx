@@ -89,7 +89,6 @@ import {
   TOOL_TYPE,
   EDITOR_LS_KEYS,
   isIOS,
-  supportsResizeObserver,
 } from "../constants";
 import { ExportedElements, exportCanvas, loadFromBlob } from "../data";
 import Library, { distributeLibraryItemsOnSquareGrid } from "../data/library";
@@ -476,6 +475,9 @@ export const useExcalidrawSetAppState = () =>
   useContext(ExcalidrawSetAppStateContext);
 export const useExcalidrawActionManager = () =>
   useContext(ExcalidrawActionManagerContext);
+
+const supportsResizeObserver =
+  typeof window !== "undefined" && "ResizeObserver" in window;
 
 let didTapTwice: boolean = false;
 let tappedTwiceTimer = 0;

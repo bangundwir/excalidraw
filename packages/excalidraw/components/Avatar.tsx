@@ -9,7 +9,8 @@ type AvatarProps = {
   color: string;
   name: string;
   src?: string;
-  className?: string;
+  isBeingFollowed?: boolean;
+  isCurrentUser: boolean;
 };
 
 export const Avatar = ({
@@ -17,14 +18,22 @@ export const Avatar = ({
   onClick,
   name,
   src,
-  className,
+  isBeingFollowed,
+  isCurrentUser,
 }: AvatarProps) => {
   const shortName = getNameInitial(name);
   const [error, setError] = useState(false);
   const loadImg = !error && src;
   const style = loadImg ? undefined : { background: color };
   return (
-    <div className={clsx("Avatar", className)} style={style} onClick={onClick}>
+    <div
+      className={clsx("Avatar", {
+        "Avatar--is-followed": isBeingFollowed,
+        "Avatar--is-current-user": isCurrentUser,
+      })}
+      style={style}
+      onClick={onClick}
+    >
       {loadImg ? (
         <img
           className="Avatar-img"

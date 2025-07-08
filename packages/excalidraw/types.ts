@@ -61,28 +61,12 @@ export type Collaborator = Readonly<{
   id?: string;
   socketId?: SocketId;
   isCurrentUser?: boolean;
-  isInCall?: boolean;
-  isSpeaking?: boolean;
-  isMuted?: boolean;
 }>;
 
 export type CollaboratorPointer = {
   x: number;
   y: number;
   tool: "pointer" | "laser";
-  /**
-   * Whether to render cursor + username. Useful when you only want to render
-   * laser trail.
-   *
-   * @default true
-   */
-  renderCursor?: boolean;
-  /**
-   * Explicit laser color.
-   *
-   * @default string collaborator's cursor color
-   */
-  laserColor?: string;
 };
 
 export type DataURL = string & { _brand: "DataURL" };
@@ -335,9 +319,9 @@ export interface AppState {
     y: number;
   } | null;
   objectsSnapModeEnabled: boolean;
-  /** the user's socket id & username who is being followed on the canvas */
+  /** the user's clientId & username who is being followed on the canvas */
   userToFollow: UserToFollow | null;
-  /** the socket ids of the users following the current user */
+  /** the clientIds of the users following the current user */
   followedBy: Set<SocketId>;
 }
 
