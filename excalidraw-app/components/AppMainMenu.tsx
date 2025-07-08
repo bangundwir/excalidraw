@@ -2,6 +2,7 @@ import React from "react";
 import { MainMenu } from "@excalidraw/excalidraw/index";
 
 import {
+  LinuxdoIcon,
   GithubIcon,
   saveAs,
   extraToolsIcon,
@@ -27,7 +28,7 @@ export const AppMainMenu: React.FC<{
   const setSaveAsDialog = useSetAtom(saveAsDialogAtom);
 
   const handleLogin = () => {
-    window.location.href = "/auth/github/login";
+    window.location.href = "/auth/linuxdo/login";
   };
 
   const handleLogout = () => {
@@ -132,8 +133,8 @@ export const AppMainMenu: React.FC<{
           </button>
         </div>
       ) : (
-        <MainMenu.Item onSelect={handleLogin} icon={GithubIcon}>
-          Login with GitHub
+        <MainMenu.Item onSelect={handleLogin} icon={LinuxdoIcon}>
+          Login with Linux.do
         </MainMenu.Item>
       )}
       <MainMenu.Separator />
