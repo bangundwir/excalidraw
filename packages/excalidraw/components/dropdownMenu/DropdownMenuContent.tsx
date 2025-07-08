@@ -1,13 +1,15 @@
-import { Island } from "../Island";
-import { useDevice } from "../App";
 import clsx from "clsx";
-import Stack from "../Stack";
 import React, { useEffect, useRef } from "react";
-import { DropdownMenuContentPropsContext } from "./common";
+
+import { EVENT, KEYS } from "@excalidraw/common";
+
 import { useOutsideClick } from "../../hooks/useOutsideClick";
-import { KEYS } from "../../keys";
-import { EVENT } from "../../constants";
 import { useStable } from "../../hooks/useStable";
+import { useDevice } from "../App";
+import { Island } from "../Island";
+import Stack from "../Stack";
+
+import { DropdownMenuContentPropsContext } from "./common";
 
 const MenuContent = ({
   children,
@@ -42,13 +44,15 @@ const MenuContent = ({
       }
     };
 
-    document.addEventListener(EVENT.KEYDOWN, onKeyDown, {
+    const option = {
       // so that we can stop propagation of the event before it reaches
       // event handlers that were bound before this one
       capture: true,
-    });
+    };
+
+    document.addEventListener(EVENT.KEYDOWN, onKeyDown, option);
     return () => {
-      document.removeEventListener(EVENT.KEYDOWN, onKeyDown);
+      document.removeEventListener(EVENT.KEYDOWN, onKeyDown, option);
     };
   }, [callbacksRef]);
 

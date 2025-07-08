@@ -1,13 +1,20 @@
+import clsx from "clsx";
+
+import { CaptureUpdateAction } from "@excalidraw/element";
+
 import { getClientColor } from "../clients";
 import { Avatar } from "../components/Avatar";
-import { GoToCollaboratorComponentProps } from "../components/UserList";
 import { eyeIcon } from "../components/icons";
 import { t } from "../i18n";
-import { Collaborator } from "../types";
+
 import { register } from "./register";
+
+import type { GoToCollaboratorComponentProps } from "../components/UserList";
+import type { Collaborator } from "../types";
 
 export const actionGoToCollaborator = register({
   name: "goToCollaborator",
+  label: "Go to a collaborator",
   viewMode: true,
   trackEvent: { category: "collab" },
   perform: (_elements, appState, collaborator: Collaborator) => {
@@ -21,7 +28,7 @@ export const actionGoToCollaborator = register({
           ...appState,
           userToFollow: null,
         },
-        commitToHistory: false,
+        captureUpdate: CaptureUpdateAction.EVENTUALLY,
       };
     }
 
@@ -35,7 +42,7 @@ export const actionGoToCollaborator = register({
         // Close mobile menu
         openMenu: appState.openMenu === "canvas" ? null : appState.openMenu,
       },
-      commitToHistory: false,
+      captureUpdate: CaptureUpdateAction.EVENTUALLY,
     };
   },
   PanelComponent: ({ updateData, data, appState }) => {

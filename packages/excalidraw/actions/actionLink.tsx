@@ -1,15 +1,22 @@
+import { isEmbeddableElement } from "@excalidraw/element";
+
+import { KEYS, getShortcutKey } from "@excalidraw/common";
+
+import { CaptureUpdateAction } from "@excalidraw/element";
+
+import { ToolButton } from "../components/ToolButton";
 import { getContextMenuLabel } from "../components/hyperlink/Hyperlink";
 import { LinkIcon } from "../components/icons";
-import { ToolButton } from "../components/ToolButton";
-import { isEmbeddableElement } from "../element/typeChecks";
 import { t } from "../i18n";
-import { KEYS } from "../keys";
+
 import { getSelectedElements } from "../scene";
-import { getShortcutKey } from "../utils";
+
 import { register } from "./register";
 
 export const actionLink = register({
   name: "hyperlink",
+  label: (elements, appState) => getContextMenuLabel(elements, appState),
+  icon: LinkIcon,
   perform: (elements, appState) => {
     if (appState.showHyperlinkPopup === "editor") {
       return false;
@@ -22,13 +29,11 @@ export const actionLink = register({
         showHyperlinkPopup: "editor",
         openMenu: null,
       },
-      commitToHistory: true,
+      captureUpdate: CaptureUpdateAction.IMMEDIATELY,
     };
   },
   trackEvent: { category: "hyperlink", action: "click" },
   keyTest: (event) => event[KEYS.CTRL_OR_CMD] && event.key === KEYS.K,
-  contextItemLabel: (elements, appState) =>
-    getContextMenuLabel(elements, appState),
   predicate: (elements, appState) => {
     const selectedElements = getSelectedElements(elements, appState);
     return selectedElements.length === 1;

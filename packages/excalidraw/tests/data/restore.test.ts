@@ -1,18 +1,27 @@
-import * as restore from "../../data/restore";
-import {
+import { pointFrom } from "@excalidraw/math";
+import { vi } from "vitest";
+
+import { DEFAULT_SIDEBAR, FONT_FAMILY, ROUNDNESS } from "@excalidraw/common";
+
+import { newElementWith } from "@excalidraw/element";
+import * as sizeHelpers from "@excalidraw/element";
+
+import type { LocalPoint } from "@excalidraw/math";
+
+import type {
+  ExcalidrawArrowElement,
   ExcalidrawElement,
   ExcalidrawFreeDrawElement,
   ExcalidrawLinearElement,
   ExcalidrawTextElement,
-} from "../../element/types";
-import * as sizeHelpers from "../../element/sizeHelpers";
+} from "@excalidraw/element/types";
+import type { NormalizedZoomValue } from "@excalidraw/excalidraw/types";
+
 import { API } from "../helpers/api";
+import * as restore from "../../data/restore";
 import { getDefaultAppState } from "../../appState";
-import { ImportedDataState } from "../../data/types";
-import { NormalizedZoomValue } from "../../types";
-import { DEFAULT_SIDEBAR, FONT_FAMILY, ROUNDNESS } from "../../constants";
-import { newElementWith } from "../../element/mutateElement";
-import { vi } from "vitest";
+
+import type { ImportedDataState } from "../../data/types";
 
 describe("restoreElements", () => {
   const mockSizeHelper = vi.spyOn(sizeHelpers, "isInvisiblySmallElement");
@@ -72,6 +81,7 @@ describe("restoreElements", () => {
 
     expect(restoredText).toMatchSnapshot({
       seed: expect.any(Number),
+      versionNonce: expect.any(Number),
     });
   });
 
@@ -102,6 +112,7 @@ describe("restoreElements", () => {
     const freedrawElement = API.createElement({
       type: "freedraw",
       id: "id-freedraw01",
+      points: [pointFrom(0, 0), pointFrom(10, 10)],
     });
 
     const restoredFreedraw = restore.restoreElements(
@@ -109,7 +120,10 @@ describe("restoreElements", () => {
       null,
     )[0] as ExcalidrawFreeDrawElement;
 
-    expect(restoredFreedraw).toMatchSnapshot({ seed: expect.any(Number) });
+    expect(restoredFreedraw).toMatchSnapshot({
+      seed: expect.any(Number),
+      versionNonce: expect.any(Number),
+    });
   });
 
   it("should restore line and draw elements correctly", () => {
@@ -129,8 +143,14 @@ describe("restoreElements", () => {
     const restoredLine = restoredElements[0] as ExcalidrawLinearElement;
     const restoredDraw = restoredElements[1] as ExcalidrawLinearElement;
 
-    expect(restoredLine).toMatchSnapshot({ seed: expect.any(Number) });
-    expect(restoredDraw).toMatchSnapshot({ seed: expect.any(Number) });
+    expect(restoredLine).toMatchSnapshot({
+      seed: expect.any(Number),
+      versionNonce: expect.any(Number),
+    });
+    expect(restoredDraw).toMatchSnapshot({
+      seed: expect.any(Number),
+      versionNonce: expect.any(Number),
+    });
   });
 
   it("should restore arrow element correctly", () => {
@@ -140,7 +160,113 @@ describe("restoreElements", () => {
 
     const restoredArrow = restoredElements[0] as ExcalidrawLinearElement;
 
-    expect(restoredArrow).toMatchSnapshot({ seed: expect.any(Number) });
+    expect(restoredArrow).toMatchSnapshot({
+      seed: expect.any(Number),
+      versionNonce: expect.any(Number),
+    });
+  });
+
+  it("should remove imperceptibly small elements", () => {
+    const arrowElement = API.createElement({
+      type: "arrow",
+      points: [
+        [0, 0],
+        [0.02, 0.05],
+      ] as LocalPoint[],
+      x: 0,
+      y: 0,
+    });
+
+    const restoredElements = restore.restoreElements([arrowElement], null);
+
+    const restoredArrow = restoredElements[0] as
+      | ExcalidrawArrowElement
+      | undefined;
+
+    expect(restoredArrow).toBeUndefined();
+  });
+
+  it("should keep 'imperceptibly' small freedraw/line elements", () => {
+    const freedrawElement = API.createElement({
+      type: "freedraw",
+      points: [
+        [0, 0],
+        [0.0001, 0.0001],
+      ] as LocalPoint[],
+      x: 0,
+      y: 0,
+    });
+    const lineElement = API.createElement({
+      type: "line",
+      points: [
+        [0, 0],
+        [0.0001, 0.0001],
+      ] as LocalPoint[],
+      x: 0,
+      y: 0,
+    });
+
+    const restoredElements = restore.restoreElements(
+      [freedrawElement, lineElement],
+      null,
+    );
+
+    expect(restoredElements).toEqual([
+      expect.objectContaining({ id: freedrawElement.id }),
+      expect.objectContaining({ id: lineElement.id }),
+    ]);
+  });
+
+  it("should restore loop linears correctly", () => {
+    const linearElement = API.createElement({
+      type: "line",
+      points: [
+        [0, 0],
+        [100, 100],
+        [100, 200],
+        [0, 0],
+      ] as LocalPoint[],
+      x: 0,
+      y: 0,
+    });
+    const arrowElement = API.createElement({
+      type: "arrow",
+      points: [
+        [0, 0],
+        [100, 100],
+        [100, 200],
+        [0, 0],
+      ] as LocalPoint[],
+      x: 500,
+      y: 500,
+    });
+
+    const restoredElements = restore.restoreElements(
+      [linearElement, arrowElement],
+      null,
+    );
+
+    const restoredLinear = restoredElements[0] as
+      | ExcalidrawLinearElement
+      | undefined;
+    const restoredArrow = restoredElements[1] as
+      | ExcalidrawArrowElement
+      | undefined;
+
+    expect(restoredLinear?.type).toBe("line");
+    expect(restoredLinear?.points).toEqual([
+      [0, 0],
+      [100, 100],
+      [100, 200],
+      [0, 0],
+    ] as LocalPoint[]);
+    expect(restoredArrow?.type).toBe("arrow");
+    expect(restoredArrow?.points).toEqual([
+      [0, 0],
+      [100, 100],
+      [100, 200],
+      [0, 0],
+    ] as LocalPoint[]);
   });
 
   it('should set arrow element endArrowHead as "arrow" when arrow element endArrowHead is null', () => {
@@ -270,9 +396,18 @@ describe("restoreElements", () => {
 
     const restoredElements = restore.restoreElements(elements, null);
 
-    expect(restoredElements[0]).toMatchSnapshot({ seed: expect.any(Number) });
-    expect(restoredElements[1]).toMatchSnapshot({ seed: expect.any(Number) });
-    expect(restoredElements[2]).toMatchSnapshot({ seed: expect.any(Number) });
+    expect(restoredElements[0]).toMatchSnapshot({
+      seed: expect.any(Number),
+      versionNonce: expect.any(Number),
+    });
+    expect(restoredElements[1]).toMatchSnapshot({
+      seed: expect.any(Number),
+      versionNonce: expect.any(Number),
+    });
+    expect(restoredElements[2]).toMatchSnapshot({
+      seed: expect.any(Number),
+      versionNonce: expect.any(Number),
+    });
   });
 
   it("bump versions of local duplicate elements when supplied", () => {
@@ -290,12 +425,11 @@ describe("restoreElements", () => {
     expect(restoredElements).toEqual([
       expect.objectContaining({
         id: rectangle.id,
-        version: rectangle_modified.version + 1,
+        version: rectangle_modified.version + 2,
       }),
       expect.objectContaining({
         id: ellipse.id,
-        version: ellipse.version,
-        versionNonce: ellipse.versionNonce,
+        version: ellipse.version + 1,
       }),
     ]);
   });
@@ -549,11 +683,10 @@ describe("restore", () => {
       rectangle.versionNonce,
     );
     expect(restoredData.elements).toEqual([
-      expect.objectContaining({ version: rectangle_modified.version + 1 }),
+      expect.objectContaining({ version: rectangle_modified.version + 2 }),
       expect.objectContaining({
         id: ellipse.id,
-        version: ellipse.version,
-        versionNonce: ellipse.versionNonce,
+        version: ellipse.version + 1,
       }),
     ]);
   });
