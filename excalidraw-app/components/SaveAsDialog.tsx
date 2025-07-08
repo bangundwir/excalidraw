@@ -1,10 +1,12 @@
 import React, { useState, useCallback } from "react";
-import { Dialog } from "../../packages/excalidraw/components/Dialog";
-import { TextField } from "../../packages/excalidraw/components/TextField";
-import { FilledButton } from "../../packages/excalidraw/components/FilledButton";
-import { useSetAtom } from "jotai";
+import { Dialog } from "@excalidraw/excalidraw/components/Dialog";
+import { TextField } from "@excalidraw/excalidraw/components/TextField";
+import { FilledButton } from "@excalidraw/excalidraw/components/FilledButton";
+
+import { useUIAppState } from "@excalidraw/excalidraw/context/ui-appState";
+
+import { useSetAtom } from "../app-jotai";
 import { saveAsDialogAtom } from "../app-jotai";
-import { useUIAppState } from "../../packages/excalidraw/context/ui-appState";
 
 interface SaveAsDialogProps {
   onCanvasSaveAs: (name: string) => void;

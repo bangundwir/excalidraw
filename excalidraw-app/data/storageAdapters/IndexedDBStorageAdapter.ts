@@ -1,6 +1,8 @@
 import { createStore, set, get, del, entries } from "idb-keyval";
-import { CanvasData, CanvasMetadata, IStorageAdapter } from "../storage";
+
 import { generateThumbnail } from "../thumbnail";
+
+import type { CanvasData, CanvasMetadata, IStorageAdapter } from "../storage";
 
 const metadataStore = createStore("excalidraw-canvases-metadata", "metadata");
 const dataStore = createStore("excalidraw-canvases-data", "data");

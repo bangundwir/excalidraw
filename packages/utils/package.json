@@ -57,19 +57,21 @@
     "png-chunk-text": "1.0.0",
     "png-chunks-encode": "1.0.0",
     "png-chunks-extract": "1.0.0",
-    "roughjs": "4.6.4"
+    "roughjs": "4.6.4",
+    "points-on-curve": "1.0.1"
   },
   "devDependencies": {
     "cross-env": "7.0.3",
     "fonteditor-core": "2.4.0",
     "typescript": "4.9.4",
     "wawoff2": "2.0.1",
-    "which": "4.0.0"
+    "which": "4.0.0",
+    "jest-diff": "29.7.0"
   },
   "bugs": "https://github.com/excalidraw/excalidraw/issues",
   "repository": "https://github.com/excalidraw/excalidraw",
   "scripts": {
     "gen:types": "rimraf types && tsc",
-    "build:esm": "rimraf dist && node ../../scripts/buildUtils.js && yarn gen:types"
+    "build:esm": "rimraf dist && node ../../scripts/buildUtils.js && pnpm gen:types"
   }
 }

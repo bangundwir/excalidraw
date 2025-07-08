@@ -1,8 +1,10 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { Dialog } from "../../packages/excalidraw/components/Dialog";
-import { TextField } from "../../packages/excalidraw/components/TextField";
-import { FilledButton } from "../../packages/excalidraw/components/FilledButton";
-import { useAtom } from "jotai";
+
+import { Dialog } from "@excalidraw/excalidraw/components/Dialog";
+import { TextField } from "@excalidraw/excalidraw/components/TextField";
+import { FilledButton } from "@excalidraw/excalidraw/components/FilledButton";
+
+import { useAtom } from "../app-jotai";
 import { renameCanvasDialogAtom } from "../app-jotai";
 
 interface RenameCanvasDialogProps {

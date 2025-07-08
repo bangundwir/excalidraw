@@ -1,4 +1,3 @@
-import clsx from "clsx";
 import React, {
   useEffect,
   useLayoutEffect,
@@ -9,21 +8,28 @@ import React, {
   useCallback,
 } from "react";
 
-import { EVENT, isDevEnv, KEYS, updateObject } from "@excalidraw/common";
+import clsx from "clsx";
+
+import { KEYS, isDevEnv, EVENT, updateObject } from "@excalidraw/common";
+
+import { atom, useSetAtom } from "../../editor-jotai";
+
+import { Island } from "../Island";
+
+import { useDevice, useExcalidrawSetAppState } from "../App";
 
 import { useUIAppState } from "../../context/ui-appState";
-import { atom, useSetAtom } from "../../editor-jotai";
+
 import { useOutsideClick } from "../../hooks/useOutsideClick";
-import { useDevice, useExcalidrawSetAppState } from "../App";
-import { Island } from "../Island";
+
+import { SidebarTabs } from "./SidebarTabs";
+import { SidebarTab } from "./SidebarTab";
 
 import { SidebarHeader } from "./SidebarHeader";
 import { SidebarTabTrigger } from "./SidebarTabTrigger";
+import { SidebarPropsContext } from "./common";
 import { SidebarTabTriggers } from "./SidebarTabTriggers";
 import { SidebarTrigger } from "./SidebarTrigger";
-import { SidebarPropsContext } from "./common";
-import { SidebarTabs } from "./SidebarTabs";
-import { SidebarTab } from "./SidebarTab";
 
 import "./Sidebar.scss";
 
@@ -37,7 +43,7 @@ import type { SidebarProps, SidebarPropsContextValue } from "./common";
  *
  * Since we can only render one Sidebar at a time, we can use a simple flag.
  */
-export const isSidebarDockedAtom = atom(false);
+export const isSidebarDockedAtom = atom<boolean | "left" | "right">(false);
 
 export const SidebarInner = forwardRef(
   (
@@ -47,6 +53,7 @@ export const SidebarInner = forwardRef(
       onDock,
       docked,
       className,
+      position = "right",
       ...rest
     }: SidebarProps & Omit<React.RefAttributes<HTMLDivElement>, "onSelect">,
     ref: React.ForwardedRef<HTMLDivElement>,
@@ -83,6 +90,13 @@ export const SidebarInner = forwardRef(
       // explicit prop to rerender on update
       shouldRenderDockButton: !!onDock && docked != null,
     });
+
+    useLayoutEffect(() => {
+      setIsSidebarDockedAtom(docked ? position : false);
+      return () => {
+        setIsSidebarDockedAtom(false);
+      };
+    }, [setIsSidebarDockedAtom, docked, position]);
 
     const islandRef = useRef<HTMLDivElement>(null);
 
@@ -137,7 +151,12 @@ export const SidebarInner = forwardRef(
     return (
       <Island
         {...rest}
-        className={clsx("sidebar", { "sidebar--docked": docked }, className)}
+        className={clsx(
+          "sidebar",
+          `sidebar--${position}`,
+          { "sidebar--docked": docked },
+          className,
+        )}
         ref={islandRef}
       >
         <SidebarPropsContext.Provider value={headerPropsRef.current}>

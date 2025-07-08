@@ -15,7 +15,7 @@
   .ExcTextField {
     position: relative;
 
-    svg {
+    > svg {
       position: absolute;
       top: 50%; // 50% is not exactly in the center of the input
       transform: translateY(-50%);

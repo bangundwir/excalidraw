@@ -1,11 +1,8 @@
 import { generateThumbnail } from "../thumbnail";
-import {
-  CanvasData,
-  CanvasMetadata,
-  dehydrateCanvasData,
-  hydrateCanvasData,
-  IStorageAdapter,
-} from "../storage";
+
+import { dehydrateCanvasData, hydrateCanvasData } from "../storage";
+
+import type { CanvasData, CanvasMetadata, IStorageAdapter } from "../storage";
 
 const KEY_PREFIX_METADATA = "excalidraw-canvas-meta:";
 const KEY_PREFIX_DATA = "excalidraw-canvas-data:";

@@ -63,6 +63,7 @@ import {
   laserPointerToolIcon,
   MagicIcon,
   LassoIcon,
+  OpenAIIcon,
 } from "./icons";
 
 import type { AppClassProperties, AppProps, UIAppState, Zoom } from "../types";
@@ -446,6 +447,18 @@ export const ShapesSwitcher = ({
               >
                 {t("toolBar.magicframe")}
                 <DropdownMenu.Item.Badge>AI</DropdownMenu.Item.Badge>
+              </DropdownMenu.Item>
+              <DropdownMenu.Item
+                onSelect={() => {
+                  trackEvent("ai", "open-settings", "d2c");
+                  app.setOpenDialog({
+                    name: "settings",
+                  });
+                }}
+                icon={OpenAIIcon}
+                data-testid="toolbar-magicSettings"
+              >
+                {t("toolBar.aiSettings")}
               </DropdownMenu.Item>
             </>
           )}

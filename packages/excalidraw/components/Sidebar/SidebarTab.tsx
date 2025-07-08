@@ -11,7 +11,7 @@ export const SidebarTab = ({
   children: React.ReactNode;
 } & React.HTMLAttributes<HTMLDivElement>) => {
   return (
-    <RadixTabs.Content {...rest} value={tab} data-testid={tab}>
+    <RadixTabs.Content {...rest} value={tab}>
       {children}
     </RadixTabs.Content>
   );

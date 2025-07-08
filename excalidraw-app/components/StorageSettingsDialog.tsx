@@ -1,9 +1,11 @@
 import React, { useState } from "react";
-import { Dialog } from "../../packages/excalidraw/components/Dialog";
-import { Island } from "../../packages/excalidraw/components/Island";
-import { TextField } from "../../packages/excalidraw/components/TextField";
-import { FilledButton } from "../../packages/excalidraw/components/FilledButton";
-import { useAtom } from "jotai";
+
+import { Dialog } from "@excalidraw/excalidraw/components/Dialog";
+import { Island } from "@excalidraw/excalidraw/components/Island";
+import { TextField } from "@excalidraw/excalidraw/components/TextField";
+import { FilledButton } from "@excalidraw/excalidraw/components/FilledButton";
+
+import { useAtom } from "../app-jotai";
 import { storageConfigAtom } from "../app-jotai";
 
 export type StorageType = "default" | "kv" | "s3" | "indexed-db";
@@ -121,7 +123,7 @@ const StorageSettingsDialog = ({ onClose }: { onClose: () => void }) => {
           style={{
             padding: "0.5rem",
             borderRadius: "var(--border-radius-lg)",
-            border: "1px solid var(--color-border)",
+            border: "1px solid var(--color-border-outline)",
           }}
         >
           <option value="indexed-db">Browser (IndexedDB)</option>

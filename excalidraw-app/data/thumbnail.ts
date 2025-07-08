@@ -1,7 +1,9 @@
-import { exportToCanvas } from "../../packages/utils/export";
-import { AppState, BinaryFiles } from "../../packages/excalidraw/types";
-import { NonDeletedExcalidrawElement } from "../../packages/excalidraw/element/types";
-import { DEFAULT_EXPORT_PADDING } from "../../packages/excalidraw/constants";
+import { exportToCanvas } from "@excalidraw/utils/export";
+
+import { DEFAULT_EXPORT_PADDING } from "@excalidraw/common/constants";
+
+import type { AppState, BinaryFiles } from "@excalidraw/excalidraw/types";
+import type { NonDeletedExcalidrawElement } from "@excalidraw/element/types";
 
 const THUMBNAIL_WIDTH = 200;
 const THUMBNAIL_HEIGHT = 200;

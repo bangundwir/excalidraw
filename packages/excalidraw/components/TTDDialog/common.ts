@@ -68,7 +68,14 @@ export const convertMermaidToExcalidraw = async ({
     return;
   }
 
-  if (!mermaidDefinition) {
+  let definitionToParse = mermaidDefinition.trim();
+  const codeBlockMatch = definitionToParse.match(/```.*\n([\s\S]*?)\n```/);
+
+  if (codeBlockMatch && codeBlockMatch[1]) {
+    definitionToParse = codeBlockMatch[1].trim();
+  }
+
+  if (!definitionToParse) {
     resetPreview({ canvasRef, setError });
     return;
   }
@@ -78,10 +85,10 @@ export const convertMermaidToExcalidraw = async ({
 
     let ret;
     try {
-      ret = await api.parseMermaidToExcalidraw(mermaidDefinition);
+      ret = await api.parseMermaidToExcalidraw(definitionToParse);
     } catch (err: any) {
       ret = await api.parseMermaidToExcalidraw(
-        mermaidDefinition.replace(/"/g, "'"),
+        definitionToParse.replace(/"/g, "'"),
       );
     }
     const { elements, files } = ret;

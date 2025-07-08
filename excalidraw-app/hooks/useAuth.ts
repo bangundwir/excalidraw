@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
-import { User } from "../app-jotai";
+
+import type { User } from "../app-jotai";
 
 export const useAuth = (setUser: (user: User | null) => void) => {
   useEffect(() => {
@@ -38,4 +39,4 @@ export const useAuth = (setUser: (user: User | null) => void) => {
       }
     }
   }, [setUser]);
-}; 
+};

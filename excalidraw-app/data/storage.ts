@@ -1,10 +1,10 @@
-import { ExcalidrawElement } from "../../packages/excalidraw/element/types";
-import {
+import type { ExcalidrawElement } from "@excalidraw/element/types";
+import type {
   AppState,
   BinaryFiles,
   Collaborator,
   SocketId,
-} from "../../packages/excalidraw/types";
+} from "@excalidraw/excalidraw/types";
 
 /**
  * Describes the metadata of a canvas.

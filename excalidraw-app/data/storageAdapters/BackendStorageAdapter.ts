@@ -1,12 +1,11 @@
-import {
-  CanvasData,
-  CanvasMetadata,
-  dehydrateCanvasData,
-  hydrateCanvasData,
-  IStorageAdapter,
-} from "../storage";
 import { nanoid } from "nanoid";
 import { jwtDecode } from "jwt-decode";
+
+import { dehydrateCanvasData, hydrateCanvasData } from "../storage";
+
+import { generateThumbnail } from "../thumbnail";
+
+import type { CanvasData, CanvasMetadata, IStorageAdapter } from "../storage";
 
 export class AuthError extends Error {
   constructor(message: string) {
@@ -98,7 +97,21 @@ export class BackendStorageAdapter implements IStorageAdapter {
   }
 
   async saveCanvas(id: string, data: CanvasData): Promise<void> {
-    const saveData = dehydrateCanvasData(data);
+    let dataForUpload: CanvasData;
+    if (data.thumbnail) {
+      dataForUpload = data;
+    } else {
+      const thumbnail = await generateThumbnail(
+        data.elements,
+        data.appState,
+        data.files,
+      );
+      dataForUpload = {
+        ...data,
+        thumbnail: data.elements.length > 0 ? thumbnail : undefined,
+      };
+    }
+    const saveData = dehydrateCanvasData(dataForUpload);
 
     const response = await fetch(`${API_BASE_URL}/${id}`, {
       method: "PUT",
@@ -123,8 +136,17 @@ export class BackendStorageAdapter implements IStorageAdapter {
     if (!userId) {
       throw new Error("Could not parse user ID from token.");
     }
+    const thumbnail = await generateThumbnail(
+      data.elements,
+      data.appState,
+      data.files,
+    );
+    const dataWithThumbnail: CanvasData = {
+      ...data,
+      thumbnail: data.elements.length > 0 ? thumbnail : undefined,
+    };
 
-    await this.saveCanvas(newId, data);
+    await this.saveCanvas(newId, dataWithThumbnail);
     return {
       id: newId,
       name: data.appState?.name || "Untitled",

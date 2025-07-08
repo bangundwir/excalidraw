@@ -8,7 +8,6 @@
     position: absolute;
     top: 0;
     bottom: 0;
-    right: 0;
     z-index: 5;
     margin: 0;
     padding: 0;
@@ -19,9 +18,26 @@
 
     pointer-events: var(--ui-pointerEvents);
 
-    :root[dir="rtl"] & {
+    &--right {
+      right: 0;
+      border-left: 1px solid var(--sidebar-border-color);
+      :root[dir="rtl"] & {
+        left: 0;
+        right: auto;
+        border-right: 1px solid var(--sidebar-border-color);
+        border-left: 0;
+      }
+    }
+
+    &--left {
       left: 0;
-      right: auto;
+      border-right: 1px solid var(--sidebar-border-color);
+      :root[dir="rtl"] & {
+        right: 0;
+        left: auto;
+        border-left: 1px solid var(--sidebar-border-color);
+        border-right: 0;
+      }
     }
 
     &--docked {

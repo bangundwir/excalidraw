@@ -1,14 +1,21 @@
 import { useState, useCallback, useEffect } from "react";
-import { useAtom } from "jotai";
-import {
+
+import { CaptureUpdateAction } from "@excalidraw/element";
+
+import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
+
+import { AuthError } from "../data/storageAdapters/BackendStorageAdapter";
+
+import { useAtom, currentCanvasIdAtom } from "../app-jotai";
+
+import { CREATIONS_SIDEBAR_NAME } from "../app_constants";
+
+import type {
   IStorageAdapter,
   CanvasMetadata,
   CanvasData,
 } from "../data/storage";
-import { AuthError } from "../data/storageAdapters/BackendStorageAdapter";
-import { ExcalidrawImperativeAPI } from "../../packages/excalidraw/types";
-import { User, currentCanvasIdAtom } from "../app-jotai";
-import { CREATIONS_SIDEBAR_NAME } from "../app_constants";
+import type { User } from "../app-jotai";
 
 export const useCanvasManagement = ({
   storageAdapter,
@@ -29,7 +36,6 @@ export const useCanvasManagement = ({
   const refreshCanvases = useCallback(async () => {
     try {
       const canvases = await storageAdapter.listCanvases();
-      console.log("canvases", canvases);
       setCanvases(canvases);
     } catch (error) {
       console.error(error);
@@ -64,7 +70,7 @@ export const useCanvasManagement = ({
           excalidrawAPI.updateScene({
             elements: canvasData.elements,
             appState: canvasData.appState,
-            commitToHistory: true,
+            captureUpdate: CaptureUpdateAction.NEVER,
           });
           setCurrentCanvasId(id);
           resetSaveStatus();
@@ -73,7 +79,13 @@ export const useCanvasManagement = ({
         setErrorMessage("Could not load the canvas.");
       }
     },
-    [storageAdapter, excalidrawAPI, setErrorMessage, setCurrentCanvasId, resetSaveStatus],
+    [
+      storageAdapter,
+      excalidrawAPI,
+      setErrorMessage,
+      setCurrentCanvasId,
+      resetSaveStatus,
+    ],
   );
 
   const handleCanvasDelete = useCallback(
@@ -215,4 +227,4 @@ export const useCanvasManagement = ({
     handleCanvasSaveAs,
     refreshCanvases,
   };
-}; 
+};

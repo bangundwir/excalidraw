@@ -59,7 +59,6 @@ import {
   POINTER_EVENTS,
   TOOL_TYPE,
   isIOS,
-  supportsResizeObserver,
   DEFAULT_COLLISION_THRESHOLD,
   DEFAULT_TEXT_ALIGN,
   ARROW_TYPE,
@@ -459,7 +458,7 @@ import type {
   Offsets,
 } from "../types";
 import type { RoughCanvas } from "roughjs/bin/canvas";
-import type { Action, ActionResult } from "../actions/types";
+import type { Action, ActionName, ActionResult } from "../actions/types";
 
 const AppContext = React.createContext<AppClassProperties>(null!);
 const AppPropsContext = React.createContext<AppProps>(null!);
@@ -716,6 +715,9 @@ class App extends React.Component<AppProps, AppState> {
         getName: this.getName,
         registerAction: (action: Action) => {
           this.actionManager.registerAction(action);
+        },
+        unregisterAction: (actionName: ActionName) => {
+          this.actionManager.unregisterAction(actionName);
         },
         refresh: this.refresh,
         setToast: this.setToast,
@@ -1507,7 +1509,12 @@ class App extends React.Component<AppProps, AppState> {
 
   public render() {
     const selectedElements = this.scene.getSelectedElements(this.state);
-    const { renderTopRightUI, renderCustomStats } = this.props;
+    const {
+      renderTopRightUI,
+      renderCustomStats,
+      renderTopLeftUI,
+      renderLeftSidebar,
+    } = this.props;
 
     const sceneNonce = this.scene.getSceneNonce();
     const { elementsMap, visibleElements } =
@@ -1594,6 +1601,8 @@ class App extends React.Component<AppProps, AppState> {
                           onHandToolToggle={this.onHandToolToggle}
                           langCode={getLanguage().code}
                           renderTopRightUI={renderTopRightUI}
+                          renderLeftSidebar={renderLeftSidebar}
+                          renderTopLeftUI={renderTopLeftUI}
                           renderCustomStats={renderCustomStats}
                           showExitZenModeBtn={
                             typeof this.props?.zenModeEnabled === "undefined" &&

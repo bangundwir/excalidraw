@@ -29,6 +29,8 @@ const ExcalidrawBase = (props: ExcalidrawProps) => {
     isCollaborating = false,
     onPointerUpdate,
     renderTopRightUI,
+    renderTopLeftUI,
+    renderLeftSidebar,
     langCode = defaultLang.code,
     viewModeEnabled,
     zenModeEnabled,
@@ -121,6 +123,8 @@ const ExcalidrawBase = (props: ExcalidrawProps) => {
           isCollaborating={isCollaborating}
           onPointerUpdate={onPointerUpdate}
           renderTopRightUI={renderTopRightUI}
+          renderTopLeftUI={renderTopLeftUI}
+          renderLeftSidebar={renderLeftSidebar}
           langCode={langCode}
           viewModeEnabled={viewModeEnabled}
           zenModeEnabled={zenModeEnabled}
@@ -257,7 +261,6 @@ export {
   THEME,
   MIME_TYPES,
   ROUNDNESS,
-  DEFAULT_LASER_COLOR,
   UserIdleState,
   normalizeLink,
 } from "@excalidraw/common";

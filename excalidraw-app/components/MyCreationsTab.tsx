@@ -1,20 +1,27 @@
 import React from "react";
-import { useAtom, useSetAtom } from "jotai";
+
+import clsx from "clsx";
+
+import { FilledButton } from "@excalidraw/excalidraw/components/FilledButton";
+
+import {
+  FreedrawIcon,
+  LoadIcon,
+  TrashIcon,
+} from "@excalidraw/excalidraw/components/icons";
+
+import { timeAgo } from "../utils/time";
+
+import { useAtom, useSetAtom } from "../app-jotai";
 import {
   userAtom,
   createCanvasDialogAtom,
   renameCanvasDialogAtom,
 } from "../app-jotai";
-import { CanvasMetadata } from "../data/storage";
-import { FilledButton } from "../../packages/excalidraw/components/FilledButton";
-import {
-  FreedrawIcon,
-  LoadIcon,
-  TrashIcon,
-} from "../../packages/excalidraw/components/icons";
+
 import "./MyCreationsTab.scss";
-import clsx from "clsx";
-import { timeAgo } from "../utils/time";
+
+import type { CanvasMetadata } from "../data/storage";
 
 interface MyCreationsTabProps {
   canvases: readonly CanvasMetadata[];

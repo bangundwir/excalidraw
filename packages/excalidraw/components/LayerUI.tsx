@@ -87,6 +87,8 @@ interface LayerUIProps {
   showExitZenModeBtn: boolean;
   langCode: Language["code"];
   renderTopRightUI?: ExcalidrawProps["renderTopRightUI"];
+  renderTopLeftUI: ExcalidrawProps["renderTopLeftUI"];
+  renderLeftSidebar?: ExcalidrawProps["renderLeftSidebar"];
   renderCustomStats?: ExcalidrawProps["renderCustomStats"];
   UIOptions: AppProps["UIOptions"];
   onExportImage: AppClassProperties["onExportImage"];
@@ -145,6 +147,8 @@ const LayerUI = ({
   onPenModeToggle,
   showExitZenModeBtn,
   renderTopRightUI,
+  renderLeftSidebar,
+  renderTopLeftUI,
   renderCustomStats,
   UIOptions,
   onExportImage,
@@ -201,10 +205,15 @@ const LayerUI = ({
   };
 
   const renderCanvasActions = () => (
-    <div style={{ position: "relative" }}>
+    <div
+      style={{ position: "relative", display: "flex", alignItems: "center" }}
+    >
       {/* wrapping to Fragment stops React from occasionally complaining
                 about identical Keys */}
       <tunnels.MainMenuTunnel.Out />
+      <div style={{ marginLeft: "0.25rem" }}>
+        {renderTopLeftUI?.(device.editor.isMobile, appState)}
+      </div>
       {renderWelcomeScreen && <tunnels.WelcomeScreenMenuHintTunnel.Out />}
     </div>
   );
@@ -378,16 +387,19 @@ const LayerUI = ({
 
   const renderSidebars = () => {
     return (
-      <DefaultSidebar
-        __fallback
-        onDock={(docked) => {
-          trackEvent(
-            "sidebar",
-            `toggleDock (${docked ? "dock" : "undock"})`,
-            `(${device.editor.isMobile ? "mobile" : "desktop"})`,
-          );
-        }}
-      />
+      <>
+        {renderLeftSidebar?.(device.editor.isMobile, appState)}
+        <DefaultSidebar
+          __fallback
+          onDock={(docked) => {
+            trackEvent(
+              "sidebar",
+              `toggleDock (${docked ? "dock" : "undock"})`,
+              `(${device.editor.isMobile ? "mobile" : "desktop"})`,
+            );
+          }}
+        />
+      </>
     );
   };
 

@@ -32,7 +32,7 @@ import {
   isDevEnv,
 } from "@excalidraw/common";
 import polyfill from "@excalidraw/excalidraw/polyfill";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { loadFromBlob } from "@excalidraw/excalidraw/data/blob";
 import { useCallbackRefState } from "@excalidraw/excalidraw/hooks/useCallbackRefState";
 import { t } from "@excalidraw/excalidraw/i18n";
@@ -57,6 +57,12 @@ import {
   useHandleLibrary,
 } from "@excalidraw/excalidraw/data/library";
 
+import { actionSaveToActiveFile } from "@excalidraw/excalidraw/actions";
+
+import { Sidebar, DefaultSidebar } from "@excalidraw/excalidraw/index";
+
+import { LoadIcon } from "@excalidraw/excalidraw/components/icons";
+
 import type { RemoteExcalidrawElement } from "@excalidraw/excalidraw/data/reconcile";
 import type { RestoredDataState } from "@excalidraw/excalidraw/data/restore";
 import type {
@@ -74,13 +80,22 @@ import type {
 import type { ResolutionType } from "@excalidraw/common/utility-types";
 import type { ResolvablePromise } from "@excalidraw/common/utils";
 
+import type { Action, ActionName } from "@excalidraw/excalidraw/actions/types";
+
 import CustomStats from "./CustomStats";
 import {
   Provider,
   useAtom,
+  useSetAtom,
+  userAtom,
   useAtomValue,
   useAtomWithInitialValue,
   appJotaiStore,
+  storageConfigAtom,
+  currentCanvasIdAtom,
+  createCanvasDialogAtom,
+  renameCanvasDialogAtom,
+  saveAsDialogAtom,
 } from "./app-jotai";
 import {
   FIREBASE_STORAGE_PREFIXES,
@@ -102,6 +117,9 @@ import {
 } from "./components/ExportToExcalidrawPlus";
 import { TopErrorBoundary } from "./components/TopErrorBoundary";
 
+import { useAuth } from "./hooks/useAuth";
+import { useCanvasManagement } from "./hooks/useCanvasManagement";
+import { useMagicSettings } from "./hooks/useMagicSettings";
 import {
   exportToBackend,
   getCollaborationLinkData,
@@ -109,6 +127,12 @@ import {
   loadScene,
 } from "./data";
 
+import { CreateCanvasDialog } from "./components/CreateCanvasDialog";
+import { MagicSettings } from "./components/MagicSettings";
+import { RenameCanvasDialog } from "./components/RenameCanvasDialog";
+import { SaveAsDialog } from "./components/SaveAsDialog";
+
+import StorageSettingsDialog from "./components/StorageSettingsDialog";
 import { updateStaleImageStatuses } from "./data/FileManager";
 import {
   importFromLocalStorage,
@@ -137,7 +161,22 @@ import { ExcalidrawPlusIframeExport } from "./ExcalidrawPlusIframeExport";
 
 import "./index.scss";
 
+import { BackendStorageAdapter } from "./data/storageAdapters/BackendStorageAdapter";
+import { AuthError } from "./data/storageAdapters/BackendStorageAdapter";
+
+import { IndexedDBStorageAdapter } from "./data/storageAdapters/IndexedDBStorageAdapter";
+
+import { CloudflareKVAdapter } from "./data/storageAdapters/CloudflareKVAdapter";
+
+import { S3StorageAdapter } from "./data/storageAdapters/S3StorageAdapter";
+
+import { MyCreationsTab } from "./components/MyCreationsTab";
+
+import { CREATIONS_SIDEBAR_NAME } from "./app_constants";
+
 import type { CollabAPI } from "./collab/Collab";
+
+import type { IStorageAdapter } from "./data/storage";
 
 polyfill();
 
@@ -336,9 +375,109 @@ const initializeScene = async (opts: {
 
 const ExcalidrawWrapper = () => {
   const [errorMessage, setErrorMessage] = useState("");
+  const [isStorageSettingsOpen, setIsStorageSettingsOpen] = useState(false);
   const isCollabDisabled = isRunningInIframe();
 
+  const setUser = useSetAtom(userAtom);
+  useAuth(setUser);
+  const user = useAtomValue(userAtom);
+  const storageConfig = useAtomValue(storageConfigAtom);
+  const currentCanvasId = useAtomValue(currentCanvasIdAtom);
+  const [createCanvasDialogState] = useAtom(createCanvasDialogAtom);
+  const [renameCanvasDialogState] = useAtom(renameCanvasDialogAtom);
+  const [saveAsDialogState] = useAtom(saveAsDialogAtom);
+
+  const [saveStatus, setSaveStatus] = useState<
+    "saved" | "saving" | "unsaved" | "login-required"
+  >("saved");
+  const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null);
+
+  const resetSaveStatus = useCallback(() => {
+    setSaveStatus("saved");
+    setLastSaveTime(null);
+  }, []);
+
+  const storageAdapter: IStorageAdapter = useMemo(() => {
+    if (storageConfig.type === "default" && user) {
+      return new BackendStorageAdapter();
+    }
+    if (
+      storageConfig.type === "kv" &&
+      storageConfig.kvUrl &&
+      storageConfig.kvApiToken
+    ) {
+      return new CloudflareKVAdapter({
+        kv_url: storageConfig.kvUrl,
+        apiToken: storageConfig.kvApiToken,
+      });
+    }
+    if (
+      storageConfig.type === "s3" &&
+      storageConfig.s3AccessKeyId &&
+      storageConfig.s3SecretAccessKey &&
+      storageConfig.s3Region &&
+      storageConfig.s3BucketName
+    ) {
+      return new S3StorageAdapter({
+        accessKeyId: storageConfig.s3AccessKeyId,
+        secretAccessKey: storageConfig.s3SecretAccessKey,
+        region: storageConfig.s3Region,
+        bucketName: storageConfig.s3BucketName,
+      });
+    }
+    return new IndexedDBStorageAdapter();
+  }, [storageConfig, user]);
+
   const { editorTheme, appTheme, setAppTheme } = useHandleAppTheme();
+
+  const [excalidrawAPI, excalidrawRefCallback] =
+    useCallbackRefState<ExcalidrawImperativeAPI>();
+
+  const magicSettings = useMagicSettings(excalidrawAPI);
+
+  const {
+    canvases,
+    handleCanvasSelect,
+    handleCanvasDelete,
+    handleCanvasCreate,
+    handleCanvasRename,
+    handleCanvasSaveAs,
+    refreshCanvases,
+  } = useCanvasManagement({
+    storageAdapter,
+    excalidrawAPI,
+    user,
+    setErrorMessage,
+    resetSaveStatus,
+  });
+
+  const saveCanvas = useCallback(async () => {
+    if (!excalidrawAPI) {
+      return;
+    }
+    const { storageAdapter, currentCanvasId, refreshCanvases } =
+      onChangeRef.current;
+    if (currentCanvasId) {
+      setSaveStatus("saving");
+      try {
+        await storageAdapter.saveCanvas(currentCanvasId, {
+          elements: excalidrawAPI.getSceneElements(),
+          appState: excalidrawAPI.getAppState(),
+          files: excalidrawAPI.getFiles(),
+        });
+        setSaveStatus("saved");
+        setLastSaveTime(new Date());
+        await refreshCanvases();
+      } catch (e: any) {
+        if (e instanceof AuthError) {
+          setSaveStatus("login-required");
+        } else {
+          setSaveStatus("unsaved");
+        }
+        console.error(e);
+      }
+    }
+  }, [excalidrawAPI]);
 
   const [langCode, setLangCode] = useAppLangCode();
 
@@ -362,9 +501,6 @@ const ExcalidrawWrapper = () => {
       trackEvent("load", "version", getVersion());
     }, VERSION_TIMEOUT);
   }, []);
-
-  const [excalidrawAPI, excalidrawRefCallback] =
-    useCallbackRefState<ExcalidrawImperativeAPI>();
 
   const [, setShareDialogState] = useAtom(shareDialogStateAtom);
   const [collabAPI] = useAtom(collabAPIAtom);
@@ -469,10 +605,111 @@ const ExcalidrawWrapper = () => {
       }
     };
 
-    initializeScene({ collabAPI, excalidrawAPI }).then(async (data) => {
-      loadImages(data, /* isInitialLoad */ true);
-      initialStatePromiseRef.current.promise.resolve(data.scene);
-    });
+    const loadCanvas = async () => {
+      const jsonMatch = window.location.hash.match(
+        /^#json=([a-zA-Z0-9_-]+),([a-zA-Z0-9_-]+)$/,
+      );
+      const urlMatch = window.location.hash.match(/^#url=(.*)$/);
+      const isCollab =
+        isCollaborationLink(window.location.href) ||
+        isCollaborationLink(document.referrer);
+
+      if (isCollab || jsonMatch || urlMatch) {
+        initializeScene({ collabAPI, excalidrawAPI }).then(async (data) => {
+          loadImages(data, true);
+          initialStatePromiseRef.current.promise.resolve(data.scene);
+        });
+      } else {
+        let data: ResolutionType<typeof initializeScene> | null = null;
+
+        // Correctly get and set Jotai atom value outside of a React component
+        const currentCanvasId = appJotaiStore.get(currentCanvasIdAtom);
+        const setCurrentCanvasId = (id: string | null) => {
+          appJotaiStore.set(currentCanvasIdAtom, id);
+        };
+
+        if (!currentCanvasId) {
+          try {
+            const newCanvas = await storageAdapter.createCanvas({
+              elements: [],
+              appState: excalidrawAPI.getAppState(),
+              files: {},
+            });
+            setCurrentCanvasId(newCanvas.id);
+            data = {
+              scene: {
+                elements: [],
+                appState: excalidrawAPI.getAppState(),
+              },
+              isExternalScene: false,
+            } as ResolutionType<typeof initializeScene>;
+          } catch (e) {
+            console.error(e);
+            setErrorMessage(
+              e instanceof Error ? e.message : "Failed to create a new canvas.",
+            );
+            return;
+          }
+        } else {
+          try {
+            if (currentCanvasId) {
+              const canvasData = await storageAdapter.loadCanvas(
+                currentCanvasId,
+              );
+              if (canvasData) {
+                data = {
+                  scene: {
+                    elements: canvasData.elements,
+                    appState: restoreAppState(
+                      canvasData.appState,
+                      excalidrawAPI.getAppState(),
+                    ),
+                    files: canvasData.files,
+                  },
+                  isExternalScene: false,
+                } as ResolutionType<typeof initializeScene>;
+              } else {
+                // Canvas not found, create a new one
+                setCurrentCanvasId(null); // Reset invalid id
+                // This will trigger a re-render and the logic will create a new canvas
+                return;
+              }
+            }
+          } catch (e) {
+            console.error("Failed to load canvas data.", e);
+            const resetConfirmed = await openConfirmModal({
+              title: "画布加载失败",
+              description:
+                "无法加载画布，它可能已损坏。您想重置并创建一个新的空白画布吗？",
+              actionLabel: "重置画布",
+              color: "danger",
+            });
+
+            if (resetConfirmed) {
+              setCurrentCanvasId(null);
+              return;
+            }
+            const errorMessage = "无法加载指定的画布。";
+            setErrorMessage(errorMessage);
+            initialStatePromiseRef.current.promise.resolve({
+              appState: { errorMessage },
+            });
+            return;
+          }
+        }
+        if (data) {
+          loadImages(data, true);
+          initialStatePromiseRef.current.promise.resolve(data.scene);
+        } else {
+          initializeScene({ collabAPI, excalidrawAPI }).then(async (data) => {
+            loadImages(data, true);
+            initialStatePromiseRef.current.promise.resolve(data.scene);
+          });
+        }
+      }
+    };
+
+    loadCanvas();
 
     const onHashChange = async (event: HashChangeEvent) => {
       event.preventDefault();
@@ -596,7 +833,36 @@ const ExcalidrawWrapper = () => {
       );
       clearTimeout(titleTimeout);
     };
-  }, [isCollabDisabled, collabAPI, excalidrawAPI, setLangCode]);
+  }, [isCollabDisabled, collabAPI, excalidrawAPI, setLangCode, storageAdapter]);
+
+  useEffect(() => {
+    if (!excalidrawAPI) {
+      return;
+    }
+    excalidrawAPI.unregisterAction(actionSaveToActiveFile.name);
+
+    const newSaveAction = {
+      name: "saveToActiveFile" as ActionName,
+      label: "Save",
+      trackEvent: { category: "canvas" },
+      perform: async () => {
+        await saveCanvas();
+        return {
+          captureUpdate: CaptureUpdateAction.NEVER,
+        };
+      },
+      keyTest: (event: KeyboardEvent) =>
+        !event.altKey &&
+        !event.shiftKey &&
+        event.key.toLowerCase() === "s" &&
+        (event.ctrlKey || event.metaKey),
+    } as Action;
+    excalidrawAPI.registerAction(newSaveAction);
+    return () => {
+      excalidrawAPI.unregisterAction(newSaveAction.name);
+      excalidrawAPI.registerAction(actionSaveToActiveFile);
+    };
+  }, [excalidrawAPI, saveCanvas]);
 
   useEffect(() => {
     const unloadHandler = (event: BeforeUnloadEvent) => {
@@ -623,6 +889,56 @@ const ExcalidrawWrapper = () => {
     };
   }, [excalidrawAPI]);
 
+  const onChangeRef = useRef({
+    storageAdapter,
+    currentCanvasId,
+    refreshCanvases,
+    collabAPI,
+  });
+  onChangeRef.current = {
+    storageAdapter,
+    currentCanvasId,
+    refreshCanvases,
+    collabAPI,
+  };
+
+  const previousElementsRef = useRef<
+    readonly OrderedExcalidrawElement[] | null
+  >(null);
+  const previousFilesRef = useRef<BinaryFiles | null>(null);
+
+  const debouncedSave = useMemo(() => {
+    const save = async (
+      elements: readonly NonDeletedExcalidrawElement[],
+      appState: AppState,
+      files: BinaryFiles,
+    ) => {
+      const { storageAdapter, currentCanvasId } = onChangeRef.current;
+      if (currentCanvasId) {
+        setSaveStatus("saving");
+        try {
+          await storageAdapter.saveCanvas(currentCanvasId, {
+            elements,
+            appState,
+            files,
+          });
+          setSaveStatus("saved");
+          setLastSaveTime(new Date());
+          await onChangeRef.current.refreshCanvases();
+        } catch (e: any) {
+          if (e instanceof AuthError) {
+            setSaveStatus("login-required");
+          } else {
+            setSaveStatus("unsaved");
+          }
+          console.error(e);
+        }
+      }
+    };
+
+    return debounce(save, 5000);
+  }, []);
+
   const onChange = (
     elements: readonly OrderedExcalidrawElement[],
     appState: AppState,
@@ -631,6 +947,29 @@ const ExcalidrawWrapper = () => {
     if (collabAPI?.isCollaborating()) {
       collabAPI.syncElements(elements);
     }
+
+    const didElementsChange =
+      previousElementsRef.current !== elements ||
+      JSON.stringify(previousElementsRef.current) !== JSON.stringify(elements);
+
+    const didFilesChange =
+      previousFilesRef.current !== files ||
+      JSON.stringify(previousFilesRef.current) !== JSON.stringify(files);
+
+    if (collabAPI?.isCollaborating()) {
+      collabAPI.syncElements(elements);
+    } else if (currentCanvasId && (didElementsChange || didFilesChange)) {
+      setSaveStatus("unsaved");
+      debouncedSave(
+        elements as readonly NonDeletedExcalidrawElement[],
+        appState,
+        files,
+      );
+    }
+
+    // Update refs for the next comparison
+    previousElementsRef.current = elements;
+    previousFilesRef.current = files;
 
     // this check is redundant, but since this is a hot path, it's best
     // not to evaludate the nested expression every time
@@ -848,6 +1187,58 @@ const ExcalidrawWrapper = () => {
         handleKeyboardGlobally={true}
         autoFocus={true}
         theme={editorTheme}
+        renderTopLeftUI={(isMobile: boolean) => {
+          if (isMobile) {
+            return null;
+          }
+
+          let statusMessage = "";
+          if (saveStatus === "saving") {
+            statusMessage = "正在保存...";
+          } else if (saveStatus === "saved") {
+            if (lastSaveTime) {
+              statusMessage = `已保存于 ${lastSaveTime.toLocaleTimeString()}`;
+            } else {
+              statusMessage = "已保存";
+            }
+          } else if (saveStatus === "unsaved") {
+            statusMessage = "存在未保存的更改";
+          } else if (saveStatus === "login-required") {
+            statusMessage = "您必须登录才能保存更改";
+          }
+
+          return (
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <Sidebar.Trigger
+                name={CREATIONS_SIDEBAR_NAME}
+                icon={LoadIcon}
+                title="My Creations"
+              />
+              {statusMessage && (
+                <div
+                  style={{
+                    marginLeft: "0.5rem",
+                    color: "var(--color-gray-40)",
+                    fontSize: "0.8em",
+                    fontStyle: "italic",
+                  }}
+                >
+                  {statusMessage}
+                </div>
+              )}
+            </div>
+          );
+        }}
+        renderLeftSidebar={() => (
+          <Sidebar name={CREATIONS_SIDEBAR_NAME} position="left" __fallback>
+            <MyCreationsTab
+              canvases={canvases}
+              onCanvasSelect={handleCanvasSelect}
+              onCanvasDelete={handleCanvasDelete}
+              currentCanvasId={currentCanvasId}
+            />
+          </Sidebar>
+        )}
         renderTopRightUI={(isMobile) => {
           if (isMobile || !collabAPI || isCollabDisabled) {
             return null;
@@ -871,6 +1262,7 @@ const ExcalidrawWrapper = () => {
           }
         }}
       >
+        <DefaultSidebar __fallback />
         <AppMainMenu
           onCollabDialogOpen={onCollabDialogOpen}
           isCollaborating={isCollaborating}
@@ -878,6 +1270,7 @@ const ExcalidrawWrapper = () => {
           theme={appTheme}
           setTheme={(theme) => setAppTheme(theme)}
           refresh={() => forceRefresh((prev) => !prev)}
+          onStorageSettingsClick={() => setIsStorageSettingsOpen(true)}
         />
         <AppWelcomeScreen
           onCollabDialogOpen={onCollabDialogOpen}
@@ -923,6 +1316,22 @@ const ExcalidrawWrapper = () => {
           <Collab excalidrawAPI={excalidrawAPI} />
         )}
 
+        {isStorageSettingsOpen && (
+          <StorageSettingsDialog
+            onClose={() => setIsStorageSettingsOpen(false)}
+          />
+        )}
+
+        {createCanvasDialogState.isOpen && (
+          <CreateCanvasDialog onCanvasCreate={handleCanvasCreate} />
+        )}
+        {renameCanvasDialogState.isOpen && (
+          <RenameCanvasDialog onCanvasRename={handleCanvasRename} />
+        )}
+        {saveAsDialogState.isOpen && (
+          <SaveAsDialog onCanvasSaveAs={handleCanvasSaveAs} />
+        )}
+
         <ShareDialog
           collabAPI={collabAPI}
           onExportToBackend={async () => {
@@ -939,6 +1348,8 @@ const ExcalidrawWrapper = () => {
             }
           }}
         />
+
+        <MagicSettings {...magicSettings} />
 
         {errorMessage && (
           <ErrorDialog onClose={() => setErrorMessage("")}>

@@ -912,9 +912,7 @@ const _renderInteractiveScene = ({
 
       for (const element of elementsMap.values()) {
         const selectionColors = [];
-        const remoteClients = renderConfig.remoteSelectedElementIds.get(
-          element.id,
-        );
+        const remoteClients = renderConfig.remoteSelectedElementIds[element.id];
         if (
           !(
             // Elbow arrow elements cannot be selected when bound on either end

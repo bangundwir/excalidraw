@@ -1,8 +1,9 @@
 import React from "react";
-import { Card } from "../../packages/excalidraw/components/Card";
-import { ToolButton } from "../../packages/excalidraw/components/ToolButton";
-import { useI18n } from "../../packages/excalidraw/i18n";
-import { ExportImageIcon } from "../../packages/excalidraw/components/icons";
+
+import { Card } from "@excalidraw/excalidraw/components/Card";
+import { ToolButton } from "@excalidraw/excalidraw/components/ToolButton";
+import { useI18n } from "@excalidraw/excalidraw/i18n";
+import { ExportImageIcon } from "@excalidraw/excalidraw/components/icons";
 
 export const SaveAsImageUI: React.FC<{
   onSuccess: () => void;
@@ -11,7 +12,7 @@ export const SaveAsImageUI: React.FC<{
   return (
     <Card color="primary">
       <div className="Card-icon">
-        {React.cloneElement(ExportImageIcon as React.ReactElement, {
+        {React.cloneElement(ExportImageIcon as React.ReactElement<any>, {
           style: {
             width: "2.8rem",
             height: "2.8rem",

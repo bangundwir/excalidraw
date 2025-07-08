@@ -48,7 +48,7 @@ import type {
   EphemeralIncrement,
 } from "@excalidraw/element";
 
-import type { Action } from "./actions/types";
+import type { Action, ActionName } from "./actions/types";
 import type { Spreadsheet } from "./charts";
 import type { ClipboardData } from "./clipboard";
 import type App from "./components/App";
@@ -345,7 +345,8 @@ export interface AppState {
     | { name: "imageExport" | "help" | "jsonExport" }
     | { name: "ttd"; tab: "text-to-diagram" | "mermaid" }
     | { name: "commandPalette" }
-    | { name: "elementLinkSelector"; sourceElementId: ExcalidrawElement["id"] };
+    | { name: "elementLinkSelector"; sourceElementId: ExcalidrawElement["id"] }
+    | { name: "settings" };
 
   /**
    * Reflects user preference for whether the default sidebar should be docked.
@@ -551,6 +552,14 @@ export interface ExcalidrawProps {
     prevElements: readonly ExcalidrawElement[],
   ) => ExcalidrawElement[] | void;
   renderTopRightUI?: (
+    isMobile: boolean,
+    appState: UIAppState,
+  ) => JSX.Element | null;
+  renderTopLeftUI?: (
+    isMobile: boolean,
+    appState: UIAppState,
+  ) => JSX.Element | null;
+  renderLeftSidebar?: (
     isMobile: boolean,
     appState: UIAppState,
   ) => JSX.Element | null;
@@ -805,6 +814,7 @@ export interface ExcalidrawImperativeAPI {
   getName: InstanceType<typeof App>["getName"];
   scrollToContent: InstanceType<typeof App>["scrollToContent"];
   registerAction: (action: Action) => void;
+  unregisterAction: (actionName: ActionName) => void;
   refresh: InstanceType<typeof App>["refresh"];
   setToast: InstanceType<typeof App>["setToast"];
   addFiles: (data: BinaryFileData[]) => void;

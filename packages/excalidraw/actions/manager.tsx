@@ -80,6 +80,10 @@ export class ActionManager {
     this.actions[action.name] = action;
   }
 
+  unregisterAction(actionName: ActionName) {
+    delete this.actions[actionName];
+  }
+
   registerAll(actions: readonly Action[]) {
     actions.forEach((action) => this.registerAction(action));
   }
