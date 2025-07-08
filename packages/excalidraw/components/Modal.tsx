@@ -57,7 +57,7 @@ export const Modal: React.FC<{
       />
       <div
         className="Modal__content"
-        style={{ "--max-width": `${props.maxWidth}px` }}
+        style={{ "--max-width": `${props.maxWidth}px` } as React.CSSProperties}
         tabIndex={0}
       >
         {props.children}

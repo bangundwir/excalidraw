@@ -52,7 +52,7 @@ export const CustomColorList = ({
             }}
             title={c}
             aria-label={label}
-            style={{ "--swatch-color": c }}
+            style={{ "--swatch-color": c } as React.CSSProperties}
             key={i}
           >
             <div className="color-picker__button-outline" />

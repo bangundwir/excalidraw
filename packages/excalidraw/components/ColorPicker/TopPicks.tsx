@@ -59,7 +59,7 @@ export const TopPicks = ({
               COLOR_OUTLINE_CONTRAST_THRESHOLD,
             ),
           })}
-          style={{ "--swatch-color": color }}
+          style={{ "--swatch-color": color } as React.CSSProperties}
           key={color}
           type="button"
           title={color}

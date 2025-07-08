@@ -202,7 +202,9 @@ const ColorPickerTrigger = ({
           !color || !isColorDark(color, COLOR_OUTLINE_CONTRAST_THRESHOLD),
       })}
       aria-label={label}
-      style={color ? { "--swatch-color": color } : undefined}
+      style={
+        color ? ({ "--swatch-color": color } as React.CSSProperties) : undefined
+      }
       title={
         type === "elementStroke"
           ? t("labels.showStroke")

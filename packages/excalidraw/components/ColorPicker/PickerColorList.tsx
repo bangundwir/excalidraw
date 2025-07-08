@@ -77,7 +77,11 @@ const PickerColorList = ({
               color.startsWith("#") ? ` ${color}` : ""
             } — ${keybinding}`}
             aria-label={`${label} — ${keybinding}`}
-            style={color ? { "--swatch-color": color } : undefined}
+            style={
+              color
+                ? ({ "--swatch-color": color } as React.CSSProperties)
+                : undefined
+            }
             data-testid={`color-${key}`}
             key={key}
           >
