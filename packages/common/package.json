@@ -60,6 +60,7 @@
     "@braintree/sanitize-url": "6.0.2",
     "es6-promise-pool": "2.5.0",
     "open-color": "1.9.1",
-    "roughjs": "4.6.4"
+    "roughjs": "4.6.4",
+    "nanoid": "3.3.3"
   }
 }

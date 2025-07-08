@@ -230,6 +230,9 @@ importers:
       es6-promise-pool:
         specifier: 2.5.0
         version: 2.5.0
+      nanoid:
+        specifier: 3.3.3
+        version: 3.3.3
       open-color:
         specifier: 1.9.1
         version: 1.9.1
