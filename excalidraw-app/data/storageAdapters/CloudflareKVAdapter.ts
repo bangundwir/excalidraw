@@ -2,6 +2,8 @@ import { generateThumbnail } from "../thumbnail";
 
 import { dehydrateCanvasData, hydrateCanvasData } from "../storage";
 
+import { randomUUID } from "../random";
+
 import type { CanvasData, CanvasMetadata, IStorageAdapter } from "../storage";
 
 const KEY_PREFIX_METADATA = "excalidraw-canvas-meta:";
@@ -130,7 +132,7 @@ export class CloudflareKVAdapter implements IStorageAdapter {
   }
 
   async createCanvas(data: CanvasData): Promise<CanvasMetadata> {
-    const newId = window.crypto.randomUUID();
+    const newId = randomUUID();
     const now = new Date().toISOString();
     const thumbnail = await generateThumbnail(
       data.elements,

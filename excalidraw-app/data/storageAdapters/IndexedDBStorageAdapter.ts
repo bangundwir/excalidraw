@@ -1,6 +1,7 @@
 import { createStore, set, get, del, entries } from "idb-keyval";
 
 import { generateThumbnail } from "../thumbnail";
+import { randomUUID } from "../random";
 
 import type { CanvasData, CanvasMetadata, IStorageAdapter } from "../storage";
 
@@ -41,7 +42,7 @@ export class IndexedDBStorageAdapter implements IStorageAdapter {
   }
 
   async createCanvas(data: CanvasData): Promise<CanvasMetadata> {
-    const newId = window.crypto.randomUUID();
+    const newId = randomUUID();
     const now = new Date().toISOString();
     const thumbnail = await generateThumbnail(
       data.elements,

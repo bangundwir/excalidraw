@@ -9,6 +9,8 @@ import {
 import { dehydrateCanvasData, hydrateCanvasData } from "../storage";
 import { generateThumbnail } from "../thumbnail";
 
+import { randomUUID } from "../random";
+
 import type { CanvasData, CanvasMetadata, IStorageAdapter } from "../storage";
 
 const KEY_PREFIX_METADATA = "excalidraw-canvas-meta-";
@@ -119,7 +121,7 @@ export class S3StorageAdapter implements IStorageAdapter {
   }
 
   async createCanvas(data: CanvasData): Promise<CanvasMetadata> {
-    const newId = window.crypto.randomUUID();
+    const newId = randomUUID();
     const now = new Date().toISOString();
     const thumbnail = await generateThumbnail(
       data.elements,
