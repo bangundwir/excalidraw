@@ -362,7 +362,7 @@
   "canvas": {
     "saving": "Saving...",
     "saved": "Saved",
-    "savedAt": "Saved at {time}",
+    "savedAt": "Saved at ",
     "unsavedChanges": "Unsaved changes",
     "loginToSave": "Login to save"
   },
