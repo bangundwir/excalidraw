@@ -289,7 +289,7 @@
   "canvas": {
     "saving": "保存中...",
     "saved": "已保存",
-    "savedAt": "已保存于 {time}",
+    "savedAt": "已保存于 ",
     "unsavedChanges": "未保存的更改",
     "loginToSave": "登录以保存"
   },
