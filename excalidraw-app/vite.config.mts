@@ -26,6 +26,11 @@ export default defineConfig(({ mode }) => {
           target: "http://localhost:3002",
           changeOrigin: true,
         },
+        "/socket.io": {
+          target: "http://localhost:3002",
+          changeOrigin: true,
+          ws: true,
+        },
       },
     },
     // We need to specify the envDir since now there are no
