@@ -116,6 +116,9 @@ importers:
       vitest-canvas-mock:
         specifier: 0.3.3
         version: 0.3.3(vitest@3.0.6)
+      workbox-window:
+        specifier: ^7.1.0
+        version: 7.3.0
 
   examples/with-nextjs:
     dependencies:
@@ -218,6 +221,9 @@ importers:
         specifier: 3.2.2
         version: 3.2.2(vite@5.0.12(@types/node@24.0.10)(sass@1.51.0)(terser@5.43.1))
     devDependencies:
+      cross-env:
+        specifier: 7.0.3
+        version: 7.0.3
       vite-plugin-sitemap:
         specifier: 0.7.1
         version: 0.7.1
@@ -251,6 +257,9 @@ importers:
       fractional-indexing:
         specifier: 3.2.0
         version: 3.2.0
+      lodash.throttle:
+        specifier: 4.1.1
+        version: 4.1.1
       perfect-freehand:
         specifier: 1.2.0
         version: 1.2.0
@@ -264,6 +273,9 @@ importers:
       '@testing-library/react':
         specifier: 16.2.0
         version: 16.2.0(@testing-library/dom@10.4.0)(@types/react-dom@19.0.4(@types/react@19.0.10))(@types/react@19.0.10)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@types/lodash.throttle':
+        specifier: 4.1.7
+        version: 4.1.7
       typescript:
         specifier: 4.9.4
         version: 4.9.4

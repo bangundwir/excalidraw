@@ -678,10 +678,9 @@ const ExcalidrawWrapper = () => {
           } catch (e) {
             console.error("Failed to load canvas data.", e);
             const resetConfirmed = await openConfirmModal({
-              title: "画布加载失败",
-              description:
-                "无法加载画布，它可能已损坏。您想重置并创建一个新的空白画布吗？",
-              actionLabel: "重置画布",
+              title: t("canvasError.loadingFailed"),
+              description: t("canvasError.loadingFailedDescription"),
+              actionLabel: t("canvasError.resetCanvas"),
               color: "danger",
             });
 
@@ -689,7 +688,7 @@ const ExcalidrawWrapper = () => {
               setCurrentCanvasId(null);
               return;
             }
-            const errorMessage = "无法加载指定的画布。";
+            const errorMessage = t("canvasError.cannotLoadCanvas");
             setErrorMessage(errorMessage);
             initialStatePromiseRef.current.promise.resolve({
               appState: { errorMessage },
@@ -1188,23 +1187,21 @@ const ExcalidrawWrapper = () => {
         autoFocus={true}
         theme={editorTheme}
         renderTopLeftUI={(isMobile: boolean) => {
-          if (isMobile) {
-            return null;
-          }
-
           let statusMessage = "";
           if (saveStatus === "saving") {
-            statusMessage = "正在保存...";
+            statusMessage = t("canvas.saving");
           } else if (saveStatus === "saved") {
             if (lastSaveTime) {
-              statusMessage = `已保存于 ${lastSaveTime.toLocaleTimeString()}`;
+              statusMessage = t("canvas.savedAt", {
+                time: lastSaveTime.toLocaleTimeString(),
+              });
             } else {
-              statusMessage = "已保存";
+              statusMessage = t("canvas.saved");
             }
           } else if (saveStatus === "unsaved") {
-            statusMessage = "存在未保存的更改";
+            statusMessage = t("canvas.unsavedChanges");
           } else if (saveStatus === "login-required") {
-            statusMessage = "您必须登录才能保存更改";
+            statusMessage = t("canvas.loginToSave");
           }
 
           return (
@@ -1212,7 +1209,7 @@ const ExcalidrawWrapper = () => {
               <Sidebar.Trigger
                 name={CREATIONS_SIDEBAR_NAME}
                 icon={LoadIcon}
-                title="My Creations"
+                title={t("toolBar.myCreations")}
               />
               {statusMessage && (
                 <div

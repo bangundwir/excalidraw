@@ -194,7 +194,7 @@ export const TTDDialogBase = withInternalFallback(
           trackEvent("ai", "mermaid parse failed", "ttd");
           setError(
             new Error(
-              "Generated an invalid diagram :(. You may also try a different prompt.",
+              `Generated an invalid diagram :(. You may also try a different prompt. ${error.message}`,
             ),
           );
         }

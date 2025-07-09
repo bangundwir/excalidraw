@@ -534,6 +534,7 @@ const LayerUI = ({
           onHandToolToggle={onHandToolToggle}
           onPenModeToggle={onPenModeToggle}
           renderTopRightUI={renderTopRightUI}
+          renderTopLeftUI={renderTopLeftUI}
           renderCustomStats={renderCustomStats}
           renderSidebars={renderSidebars}
           device={device}
