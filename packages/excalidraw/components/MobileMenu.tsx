@@ -46,6 +46,10 @@ type MobileMenuProps = {
     isMobile: boolean,
     appState: UIAppState,
   ) => JSX.Element | null;
+  renderTopLeftUI?: (
+    isMobile: boolean,
+    appState: UIAppState,
+  ) => JSX.Element | null;
   renderCustomStats?: ExcalidrawProps["renderCustomStats"];
   renderSidebars: () => JSX.Element | null;
   device: Device;
@@ -64,6 +68,7 @@ export const MobileMenu = ({
   onPenModeToggle,
 
   renderTopRightUI,
+  renderTopLeftUI,
   renderCustomStats,
   renderSidebars,
   device,
@@ -150,6 +155,9 @@ export const MobileMenu = ({
     return (
       <div className="App-toolbar-content">
         <MainMenuTunnel.Out />
+        <div style={{ marginLeft: "0.25rem" }}>
+          {renderTopLeftUI?.(device.editor.isMobile, appState)}
+        </div>
         {actionManager.renderAction("toggleEditMenu")}
         {actionManager.renderAction(
           appState.multiElement ? "finalize" : "duplicateSelection",

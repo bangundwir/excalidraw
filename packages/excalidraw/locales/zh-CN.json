@@ -286,10 +286,21 @@
     "firefox_clipboard_write": "将高级配置首选项“dom.events.asyncClipboard.clipboardItem”设置为“true”可以启用此功能。要更改 Firefox 的高级配置首选项，请前往“about:config”页面。",
     "disableSnapping": "按住 Ctrl 或 Cmd 以禁用吸附"
   },
+  "canvas": {
+    "saving": "保存中...",
+    "saved": "已保存",
+    "savedAt": "已保存于 {time}",
+    "unsavedChanges": "未保存的更改",
+    "loginToSave": "登录以保存"
+  },
   "canvasError": {
     "cannotShowPreview": "无法显示预览",
     "canvasTooBig": "画布可能过大。",
-    "canvasTooBigTip": "提示：尝试将最远的元素移动到和其它元素更近一些。"
+    "canvasTooBigTip": "提示：尝试将最远的元素移动到和其它元素更近一些。",
+    "loadingFailed": "无法加载画布",
+    "loadingFailedDescription": "画布可能已损坏，你希望重置并创建一个新的画布吗？",
+    "resetCanvas": "重置画布",
+    "cannotLoadCanvas": "无法加载画布"
   },
   "errorSplash": {
     "headingMain": "遇到异常。请尝试<button>重新加载页面</button>。",
@@ -474,7 +485,8 @@
       "menuHint": "导出、首选项……",
       "center_heading": "图，化繁为简。",
       "toolbarHint": "选择工具并开始绘图！",
-      "helpHint": "快捷键和帮助"
+      "helpHint": "快捷键和帮助",
+      "myCreations": "我的创作"
     }
   },
   "colorPicker": {
